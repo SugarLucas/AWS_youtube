@@ -1,0 +1,28 @@
+body {
+    background-color: #0e1117;
+    color: #ffffff;
+}
+
+.stButton button {
+    background-color: #DC143C;
+    color: white;
+    font-size: 16px;
+    border-radius: 6px;
+    border: none;
+}
+
+.stTextInput {
+    font-size: 18px;
+    color: black;
+}
+
+h1, h2, h3, h4, h5 {
+    color: rgb(0, 0, 0);
+}
+
+.success-message {
+    background-color: #28a745;
+    color: white;
+    padding: 10px;
+    border-radius: 6px;
+}
