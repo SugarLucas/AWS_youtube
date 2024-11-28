@@ -4,12 +4,18 @@ import requests
 import boto3
 import uuid
 import time
-from datetime import datetime
-from youtube_transcript_api import YouTubeTranscriptApi
+import hashlib
 
 API_ENDPOINT = "https://uqahsjj2e6.execute-api.ca-central-1.amazonaws.com/Stage2/get-analysis"
 
+# Initialize DynamoDB
+dynamodb = boto3.resource('dynamodb')
+DYNAMODB_TABLE = 'g13-436-youtube-data'
+
 def make_request(video_url, request_id):
+    """
+    Make a request to the external API with the given video URL and request ID.
+    """
     data = {
         "body": {
             "video_url": video_url,
@@ -21,18 +27,13 @@ def make_request(video_url, request_id):
         "Content-Type": "application/json"
     }
 
-    # requests.post(API_ENDPOINT, headers=headers, data=json.dumps(data))
     try:
         response = requests.post(API_ENDPOINT, headers=headers, json=data)
-        response.raise_for_status()  
-        return response.json()  
+        response.raise_for_status()
+        return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
         return None
-
-# Initialize DynamoDB
-dynamodb = boto3.resource('dynamodb')
-DYNAMODB_TABLE = 'g13-436-youtube-data'
 
 class RequestPoller:
     def __init__(self, url):
@@ -68,28 +69,43 @@ class RequestPoller:
         )
 
     def poll(self, interval=5, timeout=60):
-        make_request(self.req_id, self.url)
+        """
+        Poll the DynamoDB table for the request status.
+        """
+        # Make the initial request
+        request = make_request(self.url, self.req_id)
+        
         start_time = time.time()
         while time.time() - start_time < timeout:
             response = self.table.get_item(
-                Key = { 
-                    'RequestID': self.request_id
+                Key={ 
+                    'RequestID': self.req_id
                 }
             )
-            
-            if "RequestStatus" in response["Item"]:
-                status = response["Item"]["RequestStatus"]
-                if status == "Completed":   
-                    self.logger.info(f"Request {self.request_id} completed successfully!")
-                    if "FinalResult" in response:
-                        return response["Item"]["FinalResult"]
 
-                else:
-                    self.logger.info(f"Request {self.request_id} status: {status}. Retrying in {interval} seconds.")
+            if "Item" in response:
+                item = response["Item"]
+                status = item.get("RequestStatus")
 
+                if status == "Completed":
+                    self.logger.info(f"Request {self.req_id} completed successfully!")
+                    if "FinalResult" in item:
+                        print(item)
+                        print(request)
+                        return item["FinalResult"]
+                    else:
+                        self.logger.warning(f"Request {self.req_id} completed but 'FinalResult' is missing.")
+                        return None
                 else:
-                    self.logger.warning(f"Request ID {self.req_id} not found in the table.")
+                    self.logger.info(f"Request {self.req_id} status: {status}. Retrying in {interval} seconds.")
+            else:
+                self.logger.warning(f"Request ID {self.req_id} not found in the table.")
 
             time.sleep(interval)
 
+        self.logger.error(f"Request {self.req_id} timed out after {timeout} seconds.")
+        print(request)
+        return None
 
+poller = RequestPoller('https://www.youtube.com/1')
+RequestPoller.poll(poller)

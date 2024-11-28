@@ -10,7 +10,6 @@ S3_BUCKET = '436-transcriptions'
 
 # Initialize S3 clients3_client = boto3.client('s3')
 
-
 # Helper Functions
 def extract_video_id(url):
     """Extract the video ID from a YouTube URL."""
@@ -155,5 +154,3 @@ if st.button("Analyze Video"):
 # Footer
 st.markdown("---")
 st.markdown("Developed by **LAAMA Team**.")
-                                                                   
-                                                                  
