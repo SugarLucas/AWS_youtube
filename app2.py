@@ -1,6 +1,7 @@
 import streamlit as st
 import json
 import boto3
+import request_poller as rp
 
 # AWS Configuration
 LAMBDA_FUNCTION_NAME = 'TrialTranscriber'  # Replace with your Lambda function name
@@ -38,21 +39,27 @@ st.markdown("Enter a YouTube video URL to process its transcript and save data t
 
 # User input
 video_url = st.text_input("Enter YouTube Video URL", placeholder="https://youtu.be/example")
-request_id = st.text_input("Enter a Request ID", placeholder="Unique Request ID")
+# request_id = st.text_input("Enter a Request ID", placeholder="Unique Request ID")
+
+
 
 if st.button("Submit"):
-    if video_url and request_id:
+    poller = rp.RequestPoller(video_url)
+    request_id = poller.req_id
+    final = poller.poll(poller)
+    if video_url:
         with st.spinner("Processing..."):
-            lambda_response = invoke_lambda(video_url, request_id)
+            #lambda_response = invoke_lambda(video_url, request_id)
 
-            if lambda_response:
-                status_code = lambda_response.get("statusCode")
-                response_body = json.loads(lambda_response.get("body", "{}"))
+            # if lambda_response:
+            #     status_code = lambda_response.get("statusCode")
+            #     response_body = json.loads(lambda_response.get("body", "{}"))
 
-                if status_code == 200:
-                    st.success("Processing successful!")
-                    st.json(response_body)
-                else:
-                    st.error(f"Error: {response_body.get('error', 'Unknown error')}")
-    else:
-        st.error("Please enter both a YouTube URL and a Request ID.")
+            #     if status_code == 200:
+            #         st.success("Processing successful!")
+            #         st.json(response_body)
+            #     else:
+            #         st.error(f"Error: {response_body.get('error', 'Unknown error')}")
+    #else:
+    #st.error("Please enter both a YouTube URL and a Request ID.")
+        return st.
