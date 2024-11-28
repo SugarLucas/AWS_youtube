@@ -4,6 +4,7 @@ import boto3
 import streamlit as st
 from urllib.parse import urlparse, parse_qs
 import subprocess
+import request_poller as rp
 
 # AWS S3 Configuration
 S3_BUCKET = '436-transcriptions'
@@ -96,8 +97,16 @@ if st.button("Analyze Video"):
     if video_url:
         video_id = extract_video_id(video_url)
         if video_id:
+            # Initialize RequestPoller
+            poller = rp.RequestPoller(video_id)
+            
+            # Insert a new item into DynamoDB
+            poller.new_item()
+            
             with st.spinner("Analyzing... Please wait."):
-                if run_youtube_script(video_id):
+                # Poll for status
+                result = poller.poll()
+                if result and result.get('status') == 'COMPLETED':
                     # Combine JSON file path
                     file_path = os.path.join('data', f"{video_id}.json")
 
@@ -145,7 +154,7 @@ if st.button("Analyze Video"):
                     except json.JSONDecodeError as e:
                         st.error(f"Error decoding JSON: {e}")
                 else:
-                    st.error("Failed to analyze the video.")
+                    st.error("Request timed out or failed. Please try again.")
         else:
             st.error("Invalid YouTube URL. Please enter a valid URL.")
     else:

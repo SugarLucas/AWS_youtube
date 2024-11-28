@@ -107,5 +107,5 @@ class RequestPoller:
         print(request)
         return None
 
-poller = RequestPoller('https://www.youtube.com/1')
-RequestPoller.poll(poller)
+# poller = RequestPoller('https://www.youtube.com/1')
+# RequestPoller.poll(poller)

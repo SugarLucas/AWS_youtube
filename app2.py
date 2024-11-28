@@ -38,7 +38,7 @@ st.title("YouTube Data Processor")
 st.markdown("Enter a YouTube video URL to process its transcript and save data to S3.")
 
 # User input
-video_url = st.text_input("Enter YouTube Video URL", placeholder="https://youtu.be/example")
+video_url = st.text_input("Enter YouTube Video URL", placeholder="https://www.youtube.com/watch?v=3IdJGL_gFYw")
 # request_id = st.text_input("Enter a Request ID", placeholder="Unique Request ID")
 
 
@@ -46,9 +46,10 @@ video_url = st.text_input("Enter YouTube Video URL", placeholder="https://youtu.
 if st.button("Submit"):
     poller = rp.RequestPoller(video_url)
     request_id = poller.req_id
-    final = poller.poll(poller)
+    final = poller.poll()
     if video_url:
         with st.spinner("Processing..."):
+            st.markdown(final)
             #lambda_response = invoke_lambda(video_url, request_id)
 
             # if lambda_response:
@@ -62,4 +63,3 @@ if st.button("Submit"):
             #         st.error(f"Error: {response_body.get('error', 'Unknown error')}")
     #else:
     #st.error("Please enter both a YouTube URL and a Request ID.")
-        return st.
