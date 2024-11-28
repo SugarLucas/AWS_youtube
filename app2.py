@@ -42,7 +42,6 @@ video_url = st.text_input("Enter YouTube Video URL", placeholder="https://www.yo
 # request_id = st.text_input("Enter a Request ID", placeholder="Unique Request ID")
 
 
-
 if st.button("Submit"):
     poller = rp.RequestPoller(video_url)
     request_id = poller.req_id
