@@ -6,9 +6,13 @@ import time
 import hashlib
 
 API_ENDPOINT = "https://uqahsjj2e6.execute-api.ca-central-1.amazonaws.com/Stage2/get-analysis"
+from botocore.exceptions import RefreshWithMFAUnsupportedError
 
-# Initialize DynamoDB
-dynamodb = boto3.resource('dynamodb')
+session = boto3.Session()
+#dynamodb = session.resource('dynamodb')
+# Initialize DynamoDBdynamodb = boto3.resource('dynamodb')
+REGION_NAME = 'ca-central-1'  # Replace with your region
+dynamodb = session.resource('dynamodb', region_name=REGION_NAME)
 DYNAMODB_TABLE = 'g13-436-youtube-data'
 
 def make_request(video_url, request_id, comments):
