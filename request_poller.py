@@ -11,14 +11,15 @@ API_ENDPOINT = "https://uqahsjj2e6.execute-api.ca-central-1.amazonaws.com/Stage2
 dynamodb = boto3.resource('dynamodb')
 DYNAMODB_TABLE = 'g13-436-youtube-data'
 
-def make_request(video_url, request_id):
+def make_request(video_url, request_id, comments):
     """
     Make a request to the external API with the given video URL and request ID.
     """
     data = {
         "body": {
             "video_url": video_url,
-            "request_id": request_id
+            "request_id": request_id,
+            "comments": comments, 
         }
     }
 
@@ -35,7 +36,7 @@ def make_request(video_url, request_id):
         return None
 
 class RequestPoller:
-    def __init__(self, url):
+    def __init__(self, url, comments):
         """
         Initialize the RequestPoller instance.
         """
@@ -46,6 +47,7 @@ class RequestPoller:
         # Generate a unique request ID
         self.req_id = self.generate_req_id(url)
         self.url = url 
+        self.comments = comments
 
     def generate_req_id(self, text):
         """
@@ -72,7 +74,7 @@ class RequestPoller:
         Poll the DynamoDB table for the request status.
         """
         # Make the initial request
-        request = make_request(self.url, self.req_id)
+        request = make_request(self.url, self.req_id, self.comments)
         
         start_time = time.time()
         while time.time() - start_time < timeout:
