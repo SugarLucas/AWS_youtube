@@ -28,6 +28,7 @@ def make_request(video_url, request_id, comments):
     }
 
     try:
+        print(data)
         response = requests.post(API_ENDPOINT, headers=headers, json=data)
         response.raise_for_status()
         return response.json()
@@ -69,7 +70,7 @@ class RequestPoller:
             }
         )
 
-    def poll(self, interval=5, timeout=60):
+    def poll(self, interval=5, timeout=600):
         """
         Poll the DynamoDB table for the request status.
         """
