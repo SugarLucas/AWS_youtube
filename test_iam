@@ -1,0 +1,25 @@
+# test_boto3_credentials.py
+import boto3
+from botocore.exceptions import ClientError
+
+def test_credentials():
+    try:
+        # Create a session without specifying credentials
+        session = boto3.Session(region_name='ca-central-1')
+        credentials = session.get_credentials()
+        current_credentials = credentials.get_frozen_credentials()
+
+        print("Access Key:", current_credentials.access_key)
+        print("Secret Key:", current_credentials.secret_key)
+        print("Session Token:", current_credentials.token)
+
+        # Attempt to list tables to verify access
+        dynamodb = session.client('dynamodb')
+        response = dynamodb.list_tables()
+        print("DynamoDB Tables:", response.get('TableNames', []))
+
+    except ClientError as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    test_credentials()
