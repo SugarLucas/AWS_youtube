@@ -63,12 +63,19 @@ if st.button("Submit"):
                     # Display Video Suggestions
                     st.subheader("Video Suggestions")
                     suggestions = result.get("video_suggestions", "").split("\n")
+                    # print(suggestions)
+                    # for suggestion in suggestions:
+                    #     st.button(
+                    #         suggestion,  # Display the entire link
+                    #         key=suggestion,
+                    #         on_click=lambda s=suggestion: st.write(f"[Open Link]({s})"),
+                    #     )
+
+                    suggestions = [s.strip("- ").strip() for s in suggestions]
+
                     for suggestion in suggestions:
-                        st.button(
-                            suggestion,  # Display the entire link
-                            key=suggestion,
-                            on_click=lambda s=suggestion: st.write(f"[Open Link]({s})"),
-                        )
+                            # Use st.markdown to make the suggestion a clickable link
+                                st.markdown(f"[{suggestion}]({suggestion})", unsafe_allow_html=True)
 
                    # Display Top Comments and Trends
                     st.subheader("Top Comments and Trends")
