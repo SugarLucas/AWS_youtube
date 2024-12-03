@@ -35,26 +35,31 @@ if st.button("Submit"):
 
                     # Display Metadata
                     st.subheader("Video Metadata")
-                    st.markdown(
-                        f"""
-                        <div style='font-size:16px; text-align:justify;'>
-                            <strong>Title:</strong> {metadata.get("title", "N/A")}<br>
-                            <strong>Channel:</strong> {metadata.get("channel_title", "N/A")}<br>
-                            <strong>Views:</strong> {metadata.get("view_count", "N/A")}<br>
-                            <strong>Likes:</strong> {metadata.get("like_count", "N/A")}<br>
-                            <strong>Comments:</strong> {metadata.get("comment_count", "N/A")}<br>
-                        </div>
-                        """,
-                        unsafe_allow_html=True
-                    )
+
+                    card_html = f"<div style='display: flex; flex-wrap: nowrap; gap: 20px;'><div style='background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); width: 100%; max-width: 400px; padding: 20px; font-size: 16px; text-align: left;'> <h2>{metadata.get('title', 'N/A')}</h2><h3>by {metadata.get('channel_title', 'N/A')}</h3><br></div><div style='background-color: #f9f9f9; border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); width: 100%; max-width: 200px; padding: 10px; font-size: 16px; text-align: left;'><strong>Views:</strong> {metadata.get('view_count', 'N/A')}<br><strong>Likes:</strong> {metadata.get('like_count', 'N/A')}<br><strong>Comments:</strong> {metadata.get('comment_count', 'N/A')}<br></div></div>"
+
+
+                    st.markdown(card_html, unsafe_allow_html=True)
+
+                    # st.markdown(
+                    #     f"""
+                    #     <div style='font-size:16px; text-align:justify;'>
+                    #         <strong>Title:</strong> {metadata.get("title", "N/A")}<br>
+                    #         <strong>Channel:</strong> {metadata.get("channel_title", "N/A")}<br>
+                    #         <strong>Views:</strong> {metadata.get("view_count", "N/A")}<br>
+                    #         <strong>Likes:</strong> {metadata.get("like_count", "N/A")}<br>
+                    #         <strong>Comments:</strong> {metadata.get("comment_count", "N/A")}<br>
+                    #     </div>
+                    #     """,
+                    #     unsafe_allow_html=True
+                    # )
 
                     # Display Sentiment Results
                     st.subheader("Sentiment Analysis")
                     st.markdown(
                         f"""
                         <div style='font-size:24px; font-weight:bold; text-align:center; color:#FF4B4B;'>
-                            Sentiment Score: {result.get('sentiment_score_percentage', 'N/A')}
-                        </div>
+						</div>
                         """,
                         unsafe_allow_html=True
                     )
@@ -73,9 +78,12 @@ if st.button("Submit"):
 
                     suggestions = [s.strip("- ").strip() for s in suggestions]
 
+                    # for suggestion in suggestions:
+                    #         # Use st.markd wn to make the suggestion a clickable link
+                    #             st.markdown(f"[{suggestion}]({suggestion})", unsafe_allow_html=True)
+
                     for suggestion in suggestions:
-                            # Use st.markdown to make the suggestion a clickable link
-                                st.markdown(f"[{suggestion}]({suggestion})", unsafe_allow_html=True)
+                            st.markdown(f"""<a href="{suggestion}" target="_blank"><button style="display: block; margin: 5px; padding: 10px; color: white; border: none; border-radius: 5px; cursor: pointer;">{suggestion}</button></a>""", unsafe_allow_html=True,)
 
                    # Display Top Comments and Trends
                     st.subheader("Top Comments and Trends")
