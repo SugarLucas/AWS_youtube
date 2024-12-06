@@ -1,4 +1,3 @@
-import sys
 import os
 import json
 from googleapiclient.discovery import build
@@ -6,7 +5,7 @@ from urllib.parse import urlparse, parse_qs
 from collections import defaultdict
 from datetime import datetime
 
-api_key = 'AIzaSyBLZYlWDGGfjWSef1eGz5bMsPJzj9jrwJY'
+api_key = 'AIzaSyALU9ZCw48L-JAW8DdcDs4JZjZi3_mHaPQ'  # Replace with your API key
 os.makedirs('data', exist_ok=True)
 youtube = build('youtube', 'v3', developerKey=api_key)
 
@@ -22,16 +21,19 @@ def extract_video_id(url):
         return None
     return None
 
-def get_comments(url):
-    """Retrieve comments for the given video ID."""
+def get_comments(url, max_results=30):
+    """
+    Retrieve the first `max_results` comments for the given video ID.
+    """
     video_id = extract_video_id(url)
     comments_data = []
-    request = youtube.commentThreads().list(
-        part="snippet",
-        videoId=video_id,
-        maxResults=100
-    )
-    while request:
+    try:
+        request = youtube.commentThreads().list(
+            part="snippet",
+            videoId=video_id,
+            maxResults=max_results,  # Limit to max_results
+            order="relevance"  # Retrieve relevant/top comments
+        )
         response = request.execute()
         for item in response['items']:
             snippet = item['snippet']['topLevelComment']['snippet']
@@ -43,8 +45,15 @@ def get_comments(url):
                 'reply_count': item['snippet']['totalReplyCount']
             }
             comments_data.append(comment_data)
-        request = youtube.commentThreads().list_next(request, response)
-    return comments_data
+
+        # Stop after fetching the required number of comments
+        if len(comments_data) >= max_results:
+            return comments_data[:max_results]
+
+    except Exception as e:
+        print(f"Error retrieving comments: {e}")
+
+    return comments_data[:max_results]
 
 def extract_content(comments_data): 
     """Extract all comments into a single string."""
@@ -53,24 +62,27 @@ def extract_content(comments_data):
 
 def get_video_metadata(video_id):
     """Retrieve metadata for the given video ID."""
-    request = youtube.videos().list(
-        part="snippet,contentDetails,statistics",
-        id=video_id
-    )
-    response = request.execute()
-    if response["items"]:
-        video_info = response["items"][0]
-        return {
-            "title": video_info["snippet"]["title"],
-            "description": video_info["snippet"]["description"],
-            "channel_title": video_info["snippet"]["channelTitle"],
-            "publish_date": video_info["snippet"]["publishedAt"],
-            "view_count": video_info["statistics"].get("viewCount", 0),
-            "like_count": video_info["statistics"].get("likeCount", 0),
-            "comment_count": video_info["statistics"].get("commentCount", 0),
-            "duration": video_info["contentDetails"]["duration"],
-            "category_id": video_info["snippet"]["categoryId"]
-        }
+    try:
+        request = youtube.videos().list(
+            part="snippet,contentDetails,statistics",
+            id=video_id
+        )
+        response = request.execute()
+        if response["items"]:
+            video_info = response["items"][0]
+            return {
+                "title": video_info["snippet"]["title"],
+                "description": video_info["snippet"]["description"],
+                "channel_title": video_info["snippet"]["channelTitle"],
+                "publish_date": video_info["snippet"]["publishedAt"],
+                "view_count": video_info["statistics"].get("viewCount", 0),
+                "like_count": video_info["statistics"].get("likeCount", 0),
+                "comment_count": video_info["statistics"].get("commentCount", 0),
+                "duration": video_info["contentDetails"]["duration"],
+                "category_id": video_info["snippet"]["categoryId"]
+            }
+    except Exception as e:
+        print(f"Error retrieving video metadata: {e}")
     return {"error": "Video metadata not found."}
 
 def get_video_category(category_id):
@@ -87,7 +99,7 @@ def get_video_category(category_id):
         if response["items"]:
             return response["items"][0]["snippet"]["title"]
     except Exception as e:
-        return f"Error: {e}"
+        print(f"Error retrieving category: {e}")
 
     return "Unknown Category"
 
